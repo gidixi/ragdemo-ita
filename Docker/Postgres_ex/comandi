@@ -1,0 +1,7 @@
+docker build -t my-postgres-pgvector .
+
+docker run --name my-postgres-container -d -p 5432:5432 my-postgres-pgvector
+
+docker exec -it my-postgres-container psql -U gds -d mydatabase
+
+SELECT * FROM pg_extension WHERE extname = 'vector';
