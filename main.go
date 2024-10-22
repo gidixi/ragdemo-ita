@@ -139,6 +139,36 @@ var (
 	queryFlag  = flag.Bool("query", false, "answer a query using the most relevant document")
 )
 
-// Funzione per stampare l'uso del programma
 func usage() {
-	fmt.Fprintf(flag.CommandLine.Output(), `
+	fmt.Fprintf(flag.CommandLine.Output(), `Usage:
+  %s -insert {path-to-doc-file}
+  %s -query {query-text}
+
+  Environment variables:
+    DATABASE_URL  url of database, like postgres://host/dbname
+    OLLAMA_HOST   url or host:port of OLLAMA server
+    PG*           standard postgres env. vars are understood
+`, os.Args[0], os.Args[0])
+}
+
+func main() {
+	flag.Parse()
+	if (!*insertFlag && !*queryFlag) || flag.NArg() != 1 || (*insertFlag && *queryFlag) {
+		usage()
+		os.Exit(1)
+	}
+
+	if *insertFlag {
+		if err := insert(flag.Arg(0)); err != nil {
+			fmt.Fprintf(os.Stderr, "error: %v\n", err)
+			os.Exit(1)
+		}
+	} else {
+		if doc, err := query(flag.Arg(0)); err != nil {
+			fmt.Fprintf(os.Stderr, "error: %v\n", err)
+			os.Exit(1)
+		} else {
+			fmt.Println(doc)
+		}
+	}
+}
